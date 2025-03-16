@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:haptic_feedback/haptic_feedback.dart';
+import 'package:my_first_flutter/post.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'main.g.dart';
 
 void main() {
   runApp(const ProviderScope(
@@ -25,7 +27,10 @@ class MyApp extends StatelessWidget {
   }
 }
 
-final counterProvider = StateProvider<int>((ref) => 0);
+@riverpod
+Future<List<Post>> posts(Ref ref) async {
+  return Post.fromChannel('goddamnlog');
+}
 
 class MyHomePage extends ConsumerWidget {
   const MyHomePage({super.key, required this.title});
@@ -34,33 +39,25 @@ class MyHomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final counter = ref.watch(counterProvider);
-
-    void increment() async {
-      if (await Haptics.canVibrate()) {
-        await Haptics.vibrate(HapticsType.selection);
-      }
-
-      ref.read(counterProvider.notifier).state++;
-    }
+    final posts = ref.watch(postsProvider);
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text('$counter', style: Theme.of(context).textTheme.headlineMedium),
-          ],
+      body: RefreshIndicator(
+        onRefresh: () => ref.refresh(postsProvider.future),
+        child: ListView(
+          children: posts.valueOrNull?.map((post) => ListTile(
+            title: Text(post.body),
+            subtitle: Text(post.date),
+          )).toList() ?? const [],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: increment,
-        tooltip: 'Increment',
+        onPressed: () => ref.refresh(postsProvider.future),
+        tooltip: 'Add',
         child: const Icon(Icons.add),
       ),
     );
