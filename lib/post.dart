@@ -103,6 +103,9 @@ class Post {
     );
 
     final json = jsonDecode(utf8.decode(response.bodyBytes)) as List;
-    return json.map((e) => Post.fromJson(e)).toList();
+    final list = json.map((e) => Post.fromJson(e)).toList();
+    list.sort((a, b) => b.timestamp.compareTo(a.timestamp)); // timestamp desc
+
+    return list;
   }
 }
