@@ -69,18 +69,20 @@ class MyHomePage extends ConsumerWidget {
         children: [
           RefreshIndicator(
             onRefresh: refresh,
-            child: ListView(
-              children: switch (posts) {
-                AsyncData(:final value) when value.isNotEmpty => value
-                    .map(
-                      (post) => ListTile(
-                        title: Text(post.body),
-                        subtitle: Text(post.date),
-                      ),
-                    )
-                    .toList(),
-                _ => [],
-              },
+            child: Scrollbar(
+              child: ListView(
+                children: switch (posts) {
+                  AsyncData(:final value) when value.isNotEmpty => value
+                      .map(
+                        (post) => ListTile(
+                          title: Text(post.body),
+                          subtitle: Text(post.date),
+                        ),
+                      )
+                      .toList(),
+                  _ => [],
+                },
+              ),
             ),
           ),
           if (posts is AsyncLoading)
