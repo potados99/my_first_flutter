@@ -18,19 +18,19 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'My First Flutter',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade300),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Feed'),
     );
   }
 }
 
 @riverpod
-Future<List<Post>> posts(Ref ref) async {
-  return Post.fromChannel('goddamnlog');
+Future<List<Post>> posts(Ref ref, String channel) async {
+  return Post.fromChannel(channel);
 }
 
 class MyHomePage extends ConsumerWidget {
@@ -40,14 +40,15 @@ class MyHomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final posts = ref.watch(postsProvider);
+    const channel = 'goddamnlog';
+    final posts = ref.watch(postsProvider(channel));
 
     Future<void> refresh() async {
       if (await Haptics.canVibrate()) {
         Haptics.vibrate(HapticsType.light);
       }
       try {
-        await ref.refresh(postsProvider.future);
+        await ref.refresh(postsProvider(channel).future);
 
         if (await Haptics.canVibrate()) {
           Haptics.vibrate(HapticsType.success);
@@ -103,7 +104,7 @@ class MyHomePage extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => ref.refresh(postsProvider.future),
+        onPressed: () => {},
         tooltip: 'Add',
         child: const Icon(Icons.add),
       ),
